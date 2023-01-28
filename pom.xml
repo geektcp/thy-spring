@@ -10,7 +10,7 @@
             <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
         </license>
     </licenses>
-    <url>https://github.com/geektcp/thy-core</url>
+    <url>https://github.com/geektcp/thy-spring</url>
     <scm>
         <connection>scm:git:https://github.com/geektcp/thy-common</connection>
         <developerConnection>scm:git:https://github.com/geektcp/thy-common.git</developerConnection>
