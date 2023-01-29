@@ -23,6 +23,9 @@
             <organization>https://github.com/geektcp</organization>
         </developer>
     </developers>
+    <name>thy-spring</name>
+    <description>spring cloud base library for Java</description>
+
     <groupId>com.geektcp.common</groupId>
     <artifactId>thy-spring</artifactId>
     <version>1.0.0.RELEASE</version>
