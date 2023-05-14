@@ -1,6 +1,6 @@
 package com.geektcp.common.spring.constant;
 
-import com.geektcp.common.core.constant.Status;
+import com.geektcp.common.mosheh.constant.Status;
 
 /**
  * @author tanghaiyang on 2020-03-28 17:41

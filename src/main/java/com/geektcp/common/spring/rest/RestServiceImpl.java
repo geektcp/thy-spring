@@ -1,7 +1,7 @@
 package com.geektcp.common.spring.rest;
 
-import com.geektcp.common.core.util.JSONUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.geektcp.common.mosheh.util.JsonUtils;
 import org.apache.http.client.utils.URIBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
@@ -20,8 +20,12 @@ import java.util.Objects;
 @Component
 public class RestServiceImpl implements RestService {
 
-    @Autowired
     private RestTemplate restTemplate;
+
+    @Autowired
+    private void set(RestTemplate restTemplate){
+        this.restTemplate = restTemplate;
+    }
 
     @Override
     public <Req, Resp> Resp doGet(String url, Req request, Class<Resp> responseType) throws Exception {
@@ -68,7 +72,7 @@ public class RestServiceImpl implements RestService {
         if (requestQo instanceof Map) {
             params = new HashMap<>((Map) requestQo);
         } else {
-            params = JSONUtils.toMap(requestQo);
+            params = JsonUtils.toMap(requestQo);
         }
         return params;
     }

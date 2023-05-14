@@ -1,9 +1,9 @@
 package com.geektcp.common.spring.util;
 
 import com.google.common.collect.Maps;
-import com.geektcp.common.core.constant.CommonExceptionStatus;
-import com.geektcp.common.core.exception.BaseException;
-import com.geektcp.common.core.util.DateUtils;
+import com.geektcp.common.mosheh.constant.CommonStatus;
+import com.geektcp.common.mosheh.exception.BaseException;
+import com.geektcp.common.mosheh.util.DateUtils;
 import com.geektcp.common.spring.constant.TokenType;
 import com.geektcp.common.spring.model.vo.UserTokenVo;
 import io.jsonwebtoken.Claims;
@@ -104,7 +104,7 @@ public class JwtTokenUtils implements Serializable {
             return claims.getExpiration();
         } catch (Exception e) {
             log.error("exception", e);
-            throw new BaseException(CommonExceptionStatus.INTERNAL_SERVER_ERROR);
+            throw new BaseException(CommonStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -172,7 +172,7 @@ public class JwtTokenUtils implements Serializable {
 
     public String generateToken(String tenantId, String username, String id, String type, String ip, TokenType tokenType, String name, Long extendTime) {
         if (StringUtils.isEmpty(id)) {
-            throw new BaseException(CommonExceptionStatus.MEDIA_TYPE_EX);
+            throw new BaseException(CommonStatus.MEDIA_TYPE_EX);
         }
         long t1 = System.currentTimeMillis();
         HttpRequestHeadUtils.setCurTenantId(tenantId);

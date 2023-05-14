@@ -1,7 +1,7 @@
 package com.geektcp.common.spring.constant;
 
 
-import com.geektcp.common.core.constant.Status;
+import com.geektcp.common.mosheh.constant.Status;
 
 public enum ProgressStatus implements Status {
 

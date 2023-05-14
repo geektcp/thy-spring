@@ -2,8 +2,8 @@ package com.geektcp.common.spring.model.dto;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.geektcp.common.core.constant.Status;
-import com.geektcp.common.core.exception.BaseException;
+import com.geektcp.common.mosheh.constant.Status;
+import com.geektcp.common.mosheh.exception.BaseException;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;

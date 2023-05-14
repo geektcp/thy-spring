@@ -1,7 +1,7 @@
 package com.geektcp.common.spring.util;
 
-import com.geektcp.common.core.exception.BaseException;
-import com.geektcp.common.core.generator.IdGenerator;
+import com.geektcp.common.mosheh.exception.BaseException;
+import com.geektcp.common.mosheh.generator.IdGenerator;
 import com.geektcp.common.spring.model.po.Po;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;

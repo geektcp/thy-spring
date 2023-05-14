@@ -3,7 +3,7 @@ package com.geektcp.common.spring.model.dto;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.github.pagehelper.PageInfo;
-import com.geektcp.common.core.constant.Status;
+import com.geektcp.common.mosheh.constant.Status;
 import com.geektcp.common.spring.constant.CommonStatus;
 import com.geektcp.common.spring.model.qo.PageQo;
 import io.swagger.annotations.ApiModel;
