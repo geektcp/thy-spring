@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class SpringContext implements ApplicationContextAware {
+
     public static ApplicationContext context;
     public static Environment env;
 

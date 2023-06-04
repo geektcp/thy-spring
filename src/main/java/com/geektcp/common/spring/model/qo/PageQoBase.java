@@ -10,6 +10,7 @@ import javax.validation.Valid;
  */
 @Data
 public class PageQoBase {
+
     @Valid
     @ApiModelProperty(value = "page")
     protected PageQo page = new PageQo();

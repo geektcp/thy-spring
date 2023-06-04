@@ -7,6 +7,7 @@ import lombok.Data;
  **/
 @Data
 public class ProgressVo {
+
     private Integer status;
     private Integer totalSize = 0;
     private Integer currentSize = 0;
@@ -16,4 +17,5 @@ public class ProgressVo {
     private Long endTime;
     private String msg;
     private String data;
+
 }

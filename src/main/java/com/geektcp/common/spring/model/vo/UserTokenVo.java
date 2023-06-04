@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserTokenVo {
+
     String tenantId;
     String username;
     String name;
@@ -19,4 +20,5 @@ public class UserTokenVo {
     String type;
     String ip;
     TokenType tokenType;
+
 }

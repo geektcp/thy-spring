@@ -9,6 +9,7 @@ import lombok.Data;
  */
 @Data
 public class BaseQo {
+
     public static final String OPTION_DEBUG = "option_debug";
     public static final String OPTION_TIMEOUT = "option_timeout";
 

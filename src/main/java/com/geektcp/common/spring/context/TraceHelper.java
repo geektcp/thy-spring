@@ -11,8 +11,6 @@ public class TraceHelper {
     public static final String TRACE_ID = "traceId";
 
     /**
-     * 生成 traceid
-     *
      * @return traceId
      */
     public static String getTraceId() {

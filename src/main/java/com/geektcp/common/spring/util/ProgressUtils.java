@@ -19,9 +19,12 @@ import java.util.stream.Collectors;
  **/
 @Component
 public class ProgressUtils {
+
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
+
     private long expireTime = 3600;
+
     @Autowired
     private TimeUtils timeUtils;
     private Object lock = new Object();
