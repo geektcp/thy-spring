@@ -18,11 +18,6 @@ import java.util.Date;
 @EntityListeners(JpaBasePoListener.class)
 public class BasePo extends Po {
 
-    @Column(name = "tenant_id")
-    @ApiModelProperty(hidden = true)
-    @ExcelIgnore
-    private String tenantId;
-
     @Column(name = "is_enable")
     @ApiModelProperty(hidden = true)
     @ExcelIgnore

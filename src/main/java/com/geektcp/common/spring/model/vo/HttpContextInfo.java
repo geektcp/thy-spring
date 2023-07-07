@@ -7,6 +7,7 @@ import lombok.Data;
  **/
 @Data
 public class HttpContextInfo {
+
     private String tenantId;
     private String hostIp;
     private String userName;

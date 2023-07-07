@@ -3,6 +3,7 @@ package com.geektcp.common.spring.model.vo;
 import java.io.Serializable;
 
 public class BaseResponseVO<T> implements Serializable {
+
     private static final long serialVersionUID = -2967383587947830027L;
     Integer code;
     String msg;

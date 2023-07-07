@@ -12,6 +12,6 @@ common spring cloud base libray for Java
 <dependency>
     <groupId>com.geektcp.common</groupId>
     <artifactId>thy-spring</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
 </dependency>
 ```

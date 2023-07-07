@@ -22,10 +22,6 @@ public class JpaBasePoListener {
             basePo.setCreateBy(id);
             basePo.setUpdateBy(id);
         }
-        String tenantId = HttpRequestHeadUtils.getValueByKey("tenantId");
-        if (StringUtils.isNotBlank(tenantId)) {
-            basePo.setTenantId(tenantId);
-        }
         Date now = new Date();
         basePo.setCreateDate(now);
         basePo.setUpdateDate(now);

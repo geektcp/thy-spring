@@ -8,7 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author Created by tanghaiyang on 2018/8/17.
  */
 public enum StorageType {
-    GDB("GDB", false, new String[]{}),
+    TDB("TDB", false, new String[]{}),
     UNKNOWN("unknown", false, new String[]{});
 
     private static final Map<String, StorageType> codeLookup = new ConcurrentHashMap<>(6);
@@ -19,12 +19,13 @@ public enum StorageType {
         }
     }
 
-    private boolean isHadoopPlatform;
+    private boolean isPlatform;
     private String name;
     private String[] configFile;
-    StorageType(String name, boolean isHadoopPlatform, String[] configFile){
+
+    StorageType(String name, boolean isPlatform, String[] configFile){
         this.name = name;
-        this.isHadoopPlatform = isHadoopPlatform;
+        this.isPlatform = isPlatform;
         this.configFile = configFile;
     }
 
@@ -33,7 +34,7 @@ public enum StorageType {
     }
 
     public boolean isHadoopPlatform() {
-        return isHadoopPlatform;
+        return isPlatform;
     }
 
     public String[] getConfigFile() {

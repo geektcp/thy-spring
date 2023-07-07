@@ -15,6 +15,11 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
+
+/**
+ *
+ * @author tanghaiyang 2021-07-09
+ */
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {

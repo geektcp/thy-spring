@@ -13,6 +13,7 @@ public class TreeNode implements Serializable {
     protected int id;
     protected int parentId;
     protected long sort;
+
     List<TreeNode> children = new ArrayList<TreeNode>();
 
     public List<TreeNode> getChildren() {
