@@ -9,6 +9,7 @@ import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.ClientHttpRequestFactory;
@@ -22,16 +23,19 @@ import org.springframework.web.client.RestTemplate;
 public class RestClientConfig {
 
     @Bean
+    @ConditionalOnMissingBean
     public ClientHttpRequestFactory httpRequestFactory() {
         return new HttpComponentsClientHttpRequestFactory(httpClient());
     }
 
     @Bean
+    @ConditionalOnMissingBean
     public RestTemplate restTemplate() {
         return new RestTemplate(httpRequestFactory());
     }
 
     @Bean
+    @ConditionalOnMissingBean
     public HttpClient httpClient() {
         Registry<ConnectionSocketFactory> registry = RegistryBuilder.<ConnectionSocketFactory>create()
                 .register("http", PlainConnectionSocketFactory.getSocketFactory())
