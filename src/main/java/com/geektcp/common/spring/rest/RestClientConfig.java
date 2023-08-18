@@ -25,7 +25,7 @@ public class RestClientConfig {
     @Bean
     @ConditionalOnMissingBean
     public ClientHttpRequestFactory httpRequestFactory() {
-        return new HttpComponentsClientHttpRequestFactory(httpClient());
+        return new HttpComponentsClientHttpRequestFactory(restHttpClient());
     }
 
     @Bean
@@ -36,7 +36,7 @@ public class RestClientConfig {
 
     @Bean
     @ConditionalOnMissingBean
-    public HttpClient httpClient() {
+    public HttpClient restHttpClient() {
         Registry<ConnectionSocketFactory> registry = RegistryBuilder.<ConnectionSocketFactory>create()
                 .register("http", PlainConnectionSocketFactory.getSocketFactory())
                 .register("https", SSLConnectionSocketFactory.getSocketFactory())
