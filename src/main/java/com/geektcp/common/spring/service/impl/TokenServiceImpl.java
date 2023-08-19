@@ -1,12 +1,15 @@
-package com.geektcp.common.spring.util;
+package com.geektcp.common.spring.service.impl;
 
-import com.geektcp.common.mosheh.generator.IdGenerator;
-import com.google.common.collect.Maps;
 import com.geektcp.common.mosheh.constant.CommonStatus;
 import com.geektcp.common.mosheh.exception.BaseException;
+import com.geektcp.common.mosheh.generator.IdGenerator;
 import com.geektcp.common.mosheh.util.DateUtils;
 import com.geektcp.common.spring.constant.TokenType;
 import com.geektcp.common.spring.model.vo.UserTokenVo;
+import com.geektcp.common.spring.service.TokenService;
+import com.geektcp.common.spring.util.HttpRequestHeadUtils;
+import com.geektcp.common.spring.util.IPUtils;
+import com.google.common.collect.Maps;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -18,40 +21,36 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
-import javax.servlet.http.HttpServletRequest;
-import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * @author geektcp on 2023/8/19 16:56.
+ */
+
 @Slf4j
 @Component
-public class JwtTokenUtils implements Serializable {
+public class TokenServiceImpl implements TokenService {
 
     private static final long serialVersionUID = -3301605591108950415L;
 
-    // user name
-    public static final String CLAIM_KEY_USERNAME = "sub";
-    public static final String CLAIM_KEY_CREATED = "created";
-    // user id
-    public static final String CLAIM_KEY_UID = "uid";
-    public static final String CLAIM_KEY_NAME = "name";
+    public static final String CLAIM_KEY_ID = "id";             // token id
+    public static final String CLAIM_KEY_NAME = "name";         // token name
+    public static final String CLAIM_KEY_USERNAME = "sub";      // user name
+    public static final String CLAIM_KEY_UID = "uid";           // user id
+    public static final String CLAIM_KEY_TID = "tid";           // tenant id
     public static final String CLAIM_KEY_IP = "ip";
-    // tenant id
-    public static final String CLAIM_KEY_TID = "tid";
-    // token id
-    public static final String CLAIM_KEY_ID = "id";
-    public static final String CLAIM_KEY_USER_TYPE = "utype";
-    public static final String CLAIM_KEY_OAUTH_TYPE = "oauthType";
+    public static final String CLAIM_KEY_CREATED = "created";
+    public static final String CLAIM_KEY_USER_TYPE = "user_type";
+    public static final String CLAIM_KEY_OAUTH_TYPE = "oauth_type";
 
     @Value("${gate.jwt.secret:UNKNOWN}")
     private String secret;
 
     @Value("${gate.jwt.expiration:7200}")
     private Long expiration;
-    /**
-     * expired 30 min
-     */
-    private static final long EXTEND_TIME = 60*60;
+
+    private static final long EXTEND_TIME = 60*60;  // expired 30 min
 
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
@@ -317,6 +316,7 @@ public class JwtTokenUtils implements Serializable {
         }
         return claims;
     }
+
 
     ////////////////////////////////////////////////////////////////////
     private String generateTokenByClaims(Map<String, Object> claims) {
