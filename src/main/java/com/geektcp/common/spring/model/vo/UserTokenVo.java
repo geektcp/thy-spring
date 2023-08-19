@@ -13,12 +13,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UserTokenVo {
 
-    String tenantId;
-    String username;
-    String name;
-    String id;
-    String type;
-    String ip;
-    TokenType tokenType;
+    String id;              // token id
+    String name;            // token name
+    String tokenType;      // token type: SYS|AUTH|null
+
+    String username;        // user id
+    String userId;          // user name
+    String tenantId;        // tenant id
+    String type;            // user type
+    String ip;              // client ip
 
 }

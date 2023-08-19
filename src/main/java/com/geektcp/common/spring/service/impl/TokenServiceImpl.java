@@ -39,7 +39,7 @@ public class TokenServiceImpl implements TokenService {
     public static final String CLAIM_KEY_USERNAME = "sub";      // user name
     public static final String CLAIM_KEY_UID = "uid";           // user id
     public static final String CLAIM_KEY_TID = "tid";           // tenant id
-    public static final String CLAIM_KEY_IP = "ip";             // ip
+    public static final String CLAIM_KEY_IP = "ip";             // client ip
     public static final String CLAIM_KEY_CREATED = "created";
     public static final String CLAIM_KEY_USER_TYPE = "user_type";
     public static final String CLAIM_KEY_OAUTH_TYPE = "oauth_type";
@@ -54,6 +54,16 @@ public class TokenServiceImpl implements TokenService {
 
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
+
+    @Override
+    public String getTokenIdFromToken(String token) {
+        return getValueFromToken(token, CLAIM_KEY_ID);
+    }
+
+    @Override
+    public String getTokenNameFromToken(String token) {
+        return getValueFromToken(token, CLAIM_KEY_NAME);
+    }
 
     @Override
     public String getUsernameFromToken(String token) {
@@ -71,7 +81,7 @@ public class TokenServiceImpl implements TokenService {
     }
 
     @Override
-    public String getIpFromToken(String token) {
+    public String getClientIpFromToken(String token) {
         return getValueFromToken(token, CLAIM_KEY_IP);
     }
 
@@ -146,16 +156,17 @@ public class TokenServiceImpl implements TokenService {
      * Usually delete one key
      *
      * @param token     token
-     * @param tokenType token type
+     * @param tokenTypeStr token type string
      * @return result
      */
     @Override
-    public Boolean invalid(String token, TokenType tokenType) {
+    public Boolean invalid(String token, String tokenTypeStr) {
+        TokenType tokenType = TokenType.valueOf(tokenTypeStr);
         try {
             String username = this.getUsernameFromToken(token);
             String tokenID = this.getValueFromToken(token, CLAIM_KEY_ID);
             List<String> keys = new ArrayList<>();
-            String key = getKey(IPUtils.getIp(), username, tokenID, tokenType);
+            String key = getKey(IPUtils.getIp(), username, tokenID, tokenTypeStr);
             keys.add(key);
             redisTemplate.delete(keys);
             return true;
@@ -171,7 +182,8 @@ public class TokenServiceImpl implements TokenService {
     }
 
     @Override
-    public String generateToken(String tenantId, String username, String id, String type, String ip, TokenType tokenType, String name, Long extendTime) {
+    public String generateToken(String tenantId, String username, String id, String type, String ip, String tokenTypeStr, String name, Long extendTime) {
+        TokenType tokenType = TokenType.valueOf(tokenTypeStr);
         if (StringUtils.isEmpty(id)) {
             throw new BaseException(CommonStatus.MEDIA_TYPE_EX);
         }
@@ -181,7 +193,7 @@ public class TokenServiceImpl implements TokenService {
         if (StringUtils.isEmpty(ip)) {
             ip = IPUtils.getIp();
         }
-        String strKey = getKey(ip, username, strTokenID, tokenType);
+        String strKey = getKey(ip, username, strTokenID, tokenTypeStr);
         Map<String, Object> claims = Maps.newHashMap();
         claims.put(CLAIM_KEY_USERNAME, username);
         claims.put(CLAIM_KEY_UID, id);
@@ -235,14 +247,14 @@ public class TokenServiceImpl implements TokenService {
     }
 
     @Override
-    public String refreshToken(String token, TokenType tokenType) {
+    public String refreshToken(String token, String tokenTypeStr) {
         String userName = getUsernameFromToken(token);
         String tokenID = getValueFromToken(token, CLAIM_KEY_ID);
         if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(tokenID)) {
             return null;
         }
         String ip = IPUtils.getIp();
-        String strKey = getKey(ip, userName, tokenID, tokenType);
+        String strKey = getKey(ip, userName, tokenID, tokenTypeStr);
         String refreshedToken;
         try {
             final Claims claims = getClaimsFromToken(token);
@@ -256,7 +268,7 @@ public class TokenServiceImpl implements TokenService {
     }
 
     @Override
-    public Boolean validateToken(String token, TokenType tokenType) {
+    public Boolean validateToken(String token, String tokenTypeStr) {
         if (StringUtils.isBlank(token)) {
             return false;
         }
@@ -273,15 +285,15 @@ public class TokenServiceImpl implements TokenService {
             return true;
         }
 
-        String key = getKey(IPUtils.getIp(), username, tokenID, tokenType);
+        String key = getKey(IPUtils.getIp(), username, tokenID, tokenTypeStr);
         Object existToken = redisTemplate.opsForValue().get(key);
         return (token.equals(existToken));
     }
 
     @Override
-    public Map<String, Object> validateTokenToRefresh(String token, TokenType tokenType) {
+    public Map<String, Object> validateTokenToRefresh(String token, String tokenTypeStr) {
         Map<String, Object> result = new HashMap<>();
-        boolean flag = validateToken(token, tokenType);
+        boolean flag = validateToken(token, tokenTypeStr);
         result.put("flag", flag);
         if (!flag) {
             return result;
@@ -291,15 +303,17 @@ public class TokenServiceImpl implements TokenService {
         if (expirationDate.before(checkDate)) {
             final String username = getUsernameFromToken(token);
             final String tokenID = getValueFromToken(token, CLAIM_KEY_ID);
-            String key = getKey(IPUtils.getIp(), username, tokenID, tokenType);
+            String key = getKey(IPUtils.getIp(), username, tokenID, tokenTypeStr);
             UserTokenVo userTokenVo = new UserTokenVo(
+                    getValueFromToken(token, CLAIM_KEY_ID),
+                    getValueFromToken(token, CLAIM_KEY_NAME),
+                    tokenTypeStr,
                     getValueFromToken(token, CLAIM_KEY_TID),
                     username,
-                    getValueFromToken(token, CLAIM_KEY_NAME),
                     getValueFromToken(token, CLAIM_KEY_UID),
                     getValueFromToken(token, CLAIM_KEY_USER_TYPE),
-                    IPUtils.getIp(),
-                    tokenType
+                    IPUtils.getIp()
+
             );
             String newToken = generateToken(userTokenVo, EXTEND_TIME);
             if (StringUtils.isBlank(newToken)) {
@@ -379,8 +393,8 @@ public class TokenServiceImpl implements TokenService {
         return (lastPasswordReset != null && created.before(lastPasswordReset));
     }
 
-    private String getKey(String ip, String username, String tokenId, TokenType tokenType) {
-        return tokenType + ":" + ip + ":" + username + ":" + tokenId;
+    private String getKey(String ip, String username, String tokenId, String tokenTypeStr) {
+        return tokenTypeStr + ":" + ip + ":" + username + ":" + tokenId;
     }
 }
 
