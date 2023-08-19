@@ -211,7 +211,10 @@ public class TokenServiceImpl implements TokenService {
         if (StringUtils.isEmpty(userId)) {
             throw new BaseException(CommonStatus.JWT_BASIC_INVALID);
         }
-        HttpRequestHeadUtils.setCurTenantId(tenantId);
+        if (StringUtils.isNoneEmpty(tenantId)) {
+            HttpRequestHeadUtils.setTenantId(tenantId);
+        }
+
         String tokenId = IdGenerator.getId(CLAIM_KEY_ID);
         if (StringUtils.isEmpty(clientIp)) {
             clientIp = IPUtils.getIp();
