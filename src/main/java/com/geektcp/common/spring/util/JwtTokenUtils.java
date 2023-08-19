@@ -1,5 +1,6 @@
 package com.geektcp.common.spring.util;
 
+import com.geektcp.common.mosheh.generator.IdGenerator;
 import com.google.common.collect.Maps;
 import com.geektcp.common.mosheh.constant.CommonStatus;
 import com.geektcp.common.mosheh.exception.BaseException;
@@ -27,6 +28,7 @@ import java.util.concurrent.TimeUnit;
 public class JwtTokenUtils implements Serializable {
 
     private static final long serialVersionUID = -3301605591108950415L;
+
     // user name
     public static final String CLAIM_KEY_USERNAME = "sub";
     public static final String CLAIM_KEY_CREATED = "created";
@@ -38,8 +40,8 @@ public class JwtTokenUtils implements Serializable {
     public static final String CLAIM_KEY_TID = "tid";
     // token id
     public static final String CLAIM_KEY_ID = "id";
-    public static final String CLAIM_KEY_USERTYPE = "utype";
-    public static final String CLAIM_KEY_OAUTHTYPE = "oauthType";
+    public static final String CLAIM_KEY_USER_TYPE = "utype";
+    public static final String CLAIM_KEY_OAUTH_TYPE = "oauthType";
 
     @Value("${gate.jwt.secret:UNKNOWN}")
     private String secret;
@@ -47,7 +49,7 @@ public class JwtTokenUtils implements Serializable {
     @Value("${gate.jwt.expiration:7200}")
     private Long expiration;
     /**
-     * 延长 30分钟
+     * expired 30 min
      */
     private static final long EXTEND_TIME = 60*60;
 
@@ -65,11 +67,22 @@ public class JwtTokenUtils implements Serializable {
         return username;
     }
 
+    public String getUserIdFromToken(String token) {
+        String tenantId;
+        try {
+            final Claims claims = getClaimsFromToken(token);
+            tenantId = claims.get(CLAIM_KEY_UID).toString();
+        } catch (Exception e) {
+            tenantId = null;
+        }
+        return tenantId;
+    }
+
     public String getTenantIdFromToken(String token) {
         String tenantId;
         try {
             final Claims claims = getClaimsFromToken(token);
-            tenantId = claims.get("tid").toString();
+            tenantId = claims.get(CLAIM_KEY_TID).toString();
         } catch (Exception e) {
             tenantId = null;
         }
@@ -87,27 +100,16 @@ public class JwtTokenUtils implements Serializable {
         return Value;
     }
 
-    private Date getCreatedDateFromToken(String token) {
-        Date created;
-        try {
-            final Claims claims = getClaimsFromToken(token);
-            created = new Date((Long) claims.get(CLAIM_KEY_CREATED));
-        } catch (Exception e) {
-            created = null;
-        }
-        return created;
+    public boolean expirationToken(String token){
+        String username = getUsernameFromToken(token);
+        return expirationTokenByUsername(username);
     }
 
-    private Date getExpirationDateFromToken(String token) {
-        try {
-            final Claims claims = getClaimsFromToken(token);
-            return claims.getExpiration();
-        } catch (Exception e) {
-            log.error("exception", e);
-            throw new BaseException(CommonStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
+    /**
+     * delete all of redis cache
+     * @param username username
+     * @return result
+     */
     public boolean expirationTokenByUsername(String username){
         Set<String> keys = redisTemplate.keys("*"+username+"*");
         if(CollectionUtils.isNotEmpty(keys)){
@@ -122,52 +124,49 @@ public class JwtTokenUtils implements Serializable {
         return true;
     }
 
-    public Boolean invalid(String token, TokenType tokenType) {
-        String username = this.getUsernameFromToken(token);
-        String tokenID = this.getValueFromToken(token, CLAIM_KEY_ID);
-        List<String> keys = new ArrayList<>();
-        String key = getKey(IPUtils.getIp(), username, tokenID, tokenType);
-        keys.add(key);
-        keys.add("st:" + username + ":permission");
-        redisTemplate.delete(keys);
-
-        return true;
-    }
-
-    public Claims getClaimsFromToken(String token) {
-        Claims claims;
+    /**
+     * Accuracy delete part of redis cache
+     * @param token token
+     * @return result
+     */
+    public Boolean invalid(String token) {
         try {
-            claims = Jwts.parser()
-                    .setSigningKey(Base64.getEncoder().encodeToString(secret.getBytes()))
-                    .parseClaimsJws(token)
-                    .getBody();
-        } catch (Exception e) {
-            claims = null;
+            String username = this.getUsernameFromToken(token);
+            String tokenID = this.getValueFromToken(token, CLAIM_KEY_ID);
+            List<String> keys = new ArrayList<>();
+            String key = getKey(IPUtils.getIp(), username, tokenID, null);
+            keys.add(key);
+            redisTemplate.delete(keys);
+            return true;
+        }catch (Exception e){
+            return false;
         }
-        return claims;
     }
 
-    private Date generateExpirationDate() {
-        return generateExpirationDate(null);
-    }
-
-    private Date generateExpirationDate(Long extendTime) {
-        long current = System.currentTimeMillis();
-        if(extendTime != null){
-            current += (extendTime * 1000);
-        }else {
-            current += (expiration * 1000);
+    /**
+     * Accuracy delete part of redis cache
+     * Usually delete one key
+     * @param token token
+     * @param tokenType token type
+     * @return result
+     */
+    public Boolean invalid(String token, TokenType tokenType) {
+        try {
+            String username = this.getUsernameFromToken(token);
+            String tokenID = this.getValueFromToken(token, CLAIM_KEY_ID);
+            List<String> keys = new ArrayList<>();
+            String key = getKey(IPUtils.getIp(), username, tokenID, tokenType);
+            keys.add(key);
+            redisTemplate.delete(keys);
+            return true;
+        }catch (Exception e){
+            return false;
         }
-        return new Date(current);
     }
 
     public Boolean isTokenExpired(String token) {
         final Date expirationDate = getExpirationDateFromToken(token);
         return expirationDate.before(new Date());
-    }
-
-    private Boolean isCreatedBeforeLastPasswordReset(Date created, Date lastPasswordReset) {
-        return (lastPasswordReset != null && created.before(lastPasswordReset));
     }
 
     public String generateToken(String tenantId, String username, String id, String type, String ip, TokenType tokenType, String name, Long extendTime) {
@@ -176,14 +175,17 @@ public class JwtTokenUtils implements Serializable {
         }
         long t1 = System.currentTimeMillis();
         HttpRequestHeadUtils.setCurTenantId(tenantId);
-        String strTokenID = UUID.randomUUID().toString().replace("-", "");
+        String strTokenID = IdGenerator.getId(CLAIM_KEY_ID);
+        if(StringUtils.isEmpty(ip)){
+            ip = IPUtils.getIp();
+        }
         String strKey = getKey(ip, username, strTokenID, tokenType);
         Map<String, Object> claims = Maps.newHashMap();
         claims.put(CLAIM_KEY_USERNAME, username);
         claims.put(CLAIM_KEY_UID, id);
         claims.put(CLAIM_KEY_TID, tenantId);
         claims.put(CLAIM_KEY_ID, strTokenID);
-        claims.put(CLAIM_KEY_USERTYPE, type);
+        claims.put(CLAIM_KEY_USER_TYPE, type);
         claims.put(CLAIM_KEY_CREATED, new Date());
         claims.put(CLAIM_KEY_NAME, name);
         claims.put(CLAIM_KEY_IP, ip);
@@ -201,7 +203,8 @@ public class JwtTokenUtils implements Serializable {
     }
 
     public String generateToken(UserTokenVo userTokenVo) {
-        return generateToken(userTokenVo.getTenantId(),
+        return generateToken(
+                userTokenVo.getTenantId(),
                 userTokenVo.getUsername(),
                 userTokenVo.getId(),
                 userTokenVo.getType(),
@@ -220,17 +223,6 @@ public class JwtTokenUtils implements Serializable {
                 userTokenVo.getName(), extendTime);
     }
 
-    private String generateTokenByClaims(Map<String, Object> claims) {
-        return generateTokenByClaims(claims, null);
-    }
-
-    private String generateTokenByClaims(Map<String, Object> claims, Long extendTime) {
-        return Jwts.builder().setClaims(claims)
-            .setExpiration(generateExpirationDate(extendTime))
-            .signWith(SignatureAlgorithm.HS512, Base64.getEncoder().encodeToString(secret.getBytes()))
-                .compact();
-    }
-
     public Boolean canTokenBeRefreshed(String token, Date lastPasswordReset) {
         final Date created = getCreatedDateFromToken(token);
         return !isCreatedBeforeLastPasswordReset(created, lastPasswordReset)
@@ -243,15 +235,13 @@ public class JwtTokenUtils implements Serializable {
         if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(tokenID)) {
             return null;
         }
-        HttpServletRequest request = HttpContextUtils.getHttpServletRequest();
-        String ip = IPUtils.getIp(request);
+        String ip = IPUtils.getIp();
         String strKey = getKey(ip, userName, tokenID, tokenType);
         String refreshedToken;
         try {
             final Claims claims = getClaimsFromToken(token);
             claims.put(CLAIM_KEY_CREATED, new Date());
             refreshedToken = generateTokenByClaims(claims);
-            // tokenID 与token的映射
             redisTemplate.opsForValue().set(strKey, refreshedToken, expiration, TimeUnit.SECONDS);
         } catch (Exception e) {
             refreshedToken = null;
@@ -271,7 +261,7 @@ public class JwtTokenUtils implements Serializable {
         if (isTokenExpired(token)) {
             return false;
         }
-        String oauthType = getValueFromToken(token, CLAIM_KEY_OAUTHTYPE);
+        String oauthType = getValueFromToken(token, CLAIM_KEY_OAUTH_TYPE);
         if (!StringUtils.isEmpty(oauthType)) {
             return true;
         }
@@ -299,7 +289,7 @@ public class JwtTokenUtils implements Serializable {
                     username,
                     getValueFromToken(token, CLAIM_KEY_NAME),
                     getValueFromToken(token, CLAIM_KEY_UID),
-                    getValueFromToken(token, CLAIM_KEY_USERTYPE),
+                    getValueFromToken(token, CLAIM_KEY_USER_TYPE),
                     IPUtils.getIp(),
                     tokenType
             );
@@ -313,6 +303,70 @@ public class JwtTokenUtils implements Serializable {
             redisTemplate.delete(key);
         }
         return result;
+    }
+
+    public Claims getClaimsFromToken(String token) {
+        Claims claims;
+        try {
+            claims = Jwts.parser()
+                    .setSigningKey(Base64.getEncoder().encodeToString(secret.getBytes()))
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (Exception e) {
+            claims = null;
+        }
+        return claims;
+    }
+
+    ////////////////////////////////////////////////////////////////////
+    private String generateTokenByClaims(Map<String, Object> claims) {
+        return generateTokenByClaims(claims, null);
+    }
+
+    private String generateTokenByClaims(Map<String, Object> claims, Long extendTime) {
+        return Jwts.builder().setClaims(claims)
+                .setExpiration(generateExpirationDate(extendTime))
+                .signWith(SignatureAlgorithm.HS512, Base64.getEncoder().encodeToString(secret.getBytes()))
+                .compact();
+    }
+
+    private Date getCreatedDateFromToken(String token) {
+        Date created;
+        try {
+            final Claims claims = getClaimsFromToken(token);
+            created = new Date((Long) claims.get(CLAIM_KEY_CREATED));
+        } catch (Exception e) {
+            created = null;
+        }
+        return created;
+    }
+
+    private Date getExpirationDateFromToken(String token) {
+        try {
+            final Claims claims = getClaimsFromToken(token);
+            return claims.getExpiration();
+        } catch (Exception e) {
+            log.error("exception", e);
+            throw new BaseException(CommonStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    private Date generateExpirationDate() {
+        return generateExpirationDate(null);
+    }
+
+    private Date generateExpirationDate(Long extendTime) {
+        long current = System.currentTimeMillis();
+        if(extendTime != null){
+            current += (extendTime * 1000);
+        }else {
+            current += (expiration * 1000);
+        }
+        return new Date(current);
+    }
+
+    private Boolean isCreatedBeforeLastPasswordReset(Date created, Date lastPasswordReset) {
+        return (lastPasswordReset != null && created.before(lastPasswordReset));
     }
 
     private String getKey(String ip, String username, String tokenId, TokenType tokenType) {
