@@ -1,6 +1,6 @@
 package com.geektcp.common.spring.service;
 
-import com.geektcp.common.spring.model.vo.UserTokenVo;
+import com.geektcp.common.spring.model.vo.TokenVo;
 import io.jsonwebtoken.Claims;
 
 import java.io.Serializable;
@@ -12,9 +12,13 @@ import java.util.Map;
  */
 public interface TokenService extends Serializable {
 
+    TokenVo getTokenInfoFromToken(String token);
+
     String getTokenIdFromToken(String token);
 
     String getTokenNameFromToken(String token);
+
+    String getTokenTypeFromToken(String token);
 
     String getUsernameFromToken(String token);
 
@@ -32,23 +36,23 @@ public interface TokenService extends Serializable {
 
     Boolean invalid(String token);
 
-    Boolean invalid(String token, String tokenTypeStr);
+    Boolean invalid(String token, String tokenType);
 
     Boolean isTokenExpired(String token);
 
-    String generateToken(String tenantId, String username, String id, String type, String ip, String tokenTypeStr, String name, Long extendTime);
+    String generateToken(String tenantId, String username, String id, String type, String ip, String tokenType, String name, Long extendTime);
 
-    String generateToken(UserTokenVo userTokenVo);
+    String generateToken(TokenVo tokenVo);
 
-    String generateToken(UserTokenVo userTokenVo, long extendTime);
+    String generateToken(TokenVo tokenVo, Long extendTime);
 
     Boolean canTokenBeRefreshed(String token, Date lastPasswordReset);
 
-    String refreshToken(String token, String tokenTypeStr);
+    String refreshToken(String token, String tokenType);
 
-    Boolean validateToken(String token, String tokenTypeStr);
+    Boolean validateToken(String token, String tokenType);
 
-    Map<String, Object> validateTokenToRefresh(String token, String tokenTypeStr);
+    Map<String, Object> validateTokenToRefresh(String token, String tokenType);
 
     Claims getClaimsFromToken(String token);
 

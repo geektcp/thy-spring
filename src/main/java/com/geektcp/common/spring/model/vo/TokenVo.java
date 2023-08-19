@@ -11,16 +11,16 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserTokenVo {
+public class TokenVo {
 
-    String id;              // token id
-    String name;            // token name
-    String tokenType;      // token type: SYS|AUTH|null
+    String tokeId;          // token id
+    String tokenName;       // token name
+    String tokenType;       // token type: SYS|AUTH|anything
 
-    String username;        // user id
-    String userId;          // user name
+    String userId;          // user id
+    String username;        // user name
+    String userType;        // user type
     String tenantId;        // tenant id
-    String type;            // user type
-    String ip;              // client ip
+    String clientIp;        // client ip
 
 }
