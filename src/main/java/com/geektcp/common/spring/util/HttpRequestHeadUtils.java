@@ -33,6 +33,9 @@ public class HttpRequestHeadUtils {
 
     public static String getAuthorization() {
         String authorization = getValueByKey(HEAD_AUTHORIZATION);
+        if(Objects.isNull(authorization)){
+            return null;
+        }
         return new String(Base64Utils.decodeFromString(authorization));
     }
 
