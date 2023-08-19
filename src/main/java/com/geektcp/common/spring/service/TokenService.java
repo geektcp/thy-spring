@@ -19,6 +19,7 @@ public interface TokenService extends Serializable {
 
     String getTenantIdFromToken(String token);
 
+    String getIpFromToken(String token);
 
     String getValueFromToken(String token, String key);
 
