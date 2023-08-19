@@ -12,6 +12,33 @@ import java.util.Map;
  */
 public interface TokenService extends Serializable {
 
+    /**
+     * get user info without token
+     * @return TokenVo
+     */
+    ////////////////////////////////////////////////////////////
+    TokenVo getTokenInfo();
+
+    String getTokenId();
+
+    String getTokenName();
+
+    String getTokenType();
+
+    String getUsername();
+
+    String getUserId();
+
+    String getTenantId();
+
+    String getClientI();
+
+
+    /**
+     * get user info with token
+     * @return TokenVo
+     */
+    ////////////////////////////////////////////////////////////
     TokenVo getTokenInfoFromToken(String token);
 
     String getTokenIdFromToken(String token);
@@ -30,6 +57,8 @@ public interface TokenService extends Serializable {
 
     String getValueFromToken(String token, String key);
 
+
+    ////////////////////////////////////////////////////////////
     boolean expirationToken(String token);
 
     boolean expirationTokenByUsername(String username);

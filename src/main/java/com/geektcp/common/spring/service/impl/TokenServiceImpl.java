@@ -57,6 +57,46 @@ public class TokenServiceImpl implements TokenService {
     private RedisTemplate<String, Object> redisTemplate;
 
     @Override
+    public TokenVo getTokenInfo() {
+        return getTokenInfoFromToken(HttpRequestHeadUtils.getToken());
+    }
+
+    @Override
+    public String getTokenId() {
+        return getTokenIdFromToken(HttpRequestHeadUtils.getToken());
+    }
+
+    @Override
+    public String getTokenName() {
+        return getTokenNameFromToken(HttpRequestHeadUtils.getToken());
+    }
+
+    @Override
+    public String getTokenType() {
+        return getTokenTypeFromToken(HttpRequestHeadUtils.getToken());
+    }
+
+    @Override
+    public String getUsername() {
+        return getUsernameFromToken(HttpRequestHeadUtils.getToken());
+    }
+
+    @Override
+    public String getUserId() {
+        return getUserIdFromToken(HttpRequestHeadUtils.getToken());
+    }
+
+    @Override
+    public String getTenantId() {
+        return getTenantIdFromToken(HttpRequestHeadUtils.getToken());
+    }
+
+    @Override
+    public String getClientI() {
+        return getClientIpFromToken(HttpRequestHeadUtils.getToken());
+    }
+
+    @Override
     public TokenVo getTokenInfoFromToken(String token) {
         return new TokenVo(
                 getValueFromToken(token, CLAIM_KEY_ID),
