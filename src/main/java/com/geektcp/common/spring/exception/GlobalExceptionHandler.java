@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
+import java.util.Objects;
 
 
 /**
@@ -28,7 +29,11 @@ public class GlobalExceptionHandler {
     public ResponseDTO<Object> handleException(HttpServletResponse response, BaseException e) {
         response.setStatus(e.getCode());
         log.error("", e);
-        return ResponseDTO.error(e.getCode(), e.getMessage());
+        String desc = e.getDesc();
+        if(Objects.isNull(desc)){
+            return ResponseDTO.error(e.getCode(), e.getMessage());
+        }
+        return ResponseDTO.error(e.getCode(), desc);
     }
 
     @ExceptionHandler(Exception.class)
