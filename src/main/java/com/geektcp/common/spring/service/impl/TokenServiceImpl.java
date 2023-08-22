@@ -398,7 +398,7 @@ public class TokenServiceImpl implements TokenService {
                     .parseClaimsJws(token)
                     .getBody();
         } catch (Exception e) {
-            claims = null;
+            throw new BaseException(CommonStatus.JWT_BASIC_INVALID);
         }
         return claims;
     }
