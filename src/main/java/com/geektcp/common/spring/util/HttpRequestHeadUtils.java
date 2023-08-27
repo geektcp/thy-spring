@@ -1,6 +1,7 @@
 package com.geektcp.common.spring.util;
 
 import com.geektcp.common.mosheh.system.Sys;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.Base64Utils;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -22,6 +23,10 @@ public class HttpRequestHeadUtils {
     public static final String HEAD_USER_TYPE = "User-Type";
     public static final String HEAD_NAME = "Name";
     public static final String HEAD_IP = "Ip";
+
+    public static boolean carryToken() {
+        return StringUtils.isNotEmpty(getValueByKey(HEAD_TOKEN));
+    }
 
     public static String getToken() {
         return getValueByKey(HEAD_TOKEN);
