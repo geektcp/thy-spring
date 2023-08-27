@@ -152,6 +152,9 @@ public class TokenServiceImpl implements TokenService {
      */
     @Override
     public String getValueFromToken(String token, String key) {
+        if(StringUtils.isEmpty(token)){
+            return null;
+        }
         String Value;
         try {
             final Claims claims = getClaimsFromToken(token);
