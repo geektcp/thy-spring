@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import java.util.Date;
+import java.util.Objects;
 
 /**
  * BasePo 保存通用字段赋值监听
@@ -25,9 +26,9 @@ public class JpaBasePoListener {
         Date now = new Date();
         basePo.setCreateDate(now);
         basePo.setUpdateDate(now);
-        String isEnable = basePo.getIsEnable();
-        if (StringUtils.isBlank(isEnable)) {
-            basePo.setIsEnable("1");
+        Long isEnable = basePo.getEnable();
+        if (Objects.isNull(isEnable)) {
+            basePo.setEnable(1L);
         }
     }
 
